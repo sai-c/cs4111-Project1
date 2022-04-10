@@ -189,6 +189,19 @@ def login():
     abort(401)
     this_is_never_executed()
 
+@app.route('/admin')
+def admin():
+
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NULL")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+
+  context = dict(data = names)
+  print("CONTEXT", context)
+  return render_template("admin.html", **context)
+
 
 if __name__ == "__main__":
   import click
