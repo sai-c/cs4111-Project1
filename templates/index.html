@@ -6,16 +6,59 @@
     }
   </style>
 
+  <head>
+	      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
+	      <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+  </head>
 <body>
-  <h1>Some famous Computer Scientists</h1>
-  <div>{{data}}</div>
+    <nav class="light-blue lighten-1">
+      <div class="nav-wrapper container">
+        <a href="/" id="logo-container" class="brand-logo">tech.fyi</a>
+        <ul class="right hide-on-med-and-down">
+          <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">Sign Up<i class="material-icons right">arrow_drop_down</i></a></li>
+          <li><a class="dropdown-trigger" href="#!" data-target="dropdown2">Dashboard<i class="material-icons right">arrow_drop_down</i></a></li>
+          {% if showLogout %}<li><a href="/logout">Logout</a></li>{% endif %}
+        </ul>
+        <ul id="nav-mobile" class="sidenav">
+          <li><a href="/volunteer-signup">Volunteer Sign Up</a></li>
+          <li><a href="/agency-signup">Agency Sign Up</a></li>
+          <li><a href="/login">Volunteer Login</a></li>
+          <li><a href="/agency-login">Agency Login</a></li>
+          {% if showLogout %}<li><a href="/logout">Logout</a></li>{% endif %}
+        </ul>
+      </div>
+    </nav>
+    <div style="padding-right: 10%; padding-left: 10%;">
+	<h2>Internships</h2>
+  <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Company Name</th>
+      <th scope="col">City</th>
+      <th scope="col">State</th>
+      <th scope="col">Hourly</th>
+      <th scope="col">Bonus</th>
+    </tr>
+  </thead>
+  <tbody>
 
-  <div>
     {% for n in data %}
-    <div>{{n}}</div>
+    <tr>
+      <td><a href="">{{ n['cname'] }}</a></td>
+      <td> {{ n['city'] }}</td>
+      <td> {{ n['state'] }} </td>
+      <td> {{ n['hourly'] }} </td>
+      <td> {{ n['bonus'] }} </td>
+    </tr>
+
     {% endfor %}
-  </div>
+    </tbody>
+</table>
+    </div>
 
 <p><a href="/another">Go to the other page</a></p>
 
