@@ -54,7 +54,7 @@
       <td> {{ n['state'] }} </td>
       <td> {{ n['hourly'] }} </td>
       <td> {{ n['bonus'] }} </td>
-      <td> <button>yes</button> </td>
+      <td> <form method="POST" action="/admin"> <input type="text" name="pid" type="hidden" value={{ n['pid'] }} /> <button>yes</button></form> </td>
     </tr>
 
     {% endfor %}
