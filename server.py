@@ -101,8 +101,8 @@ def teardown_request(exception):
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
-@app.route('/')
-def index():
+@app.route('/internships', methods=['GET', 'POST'])
+def internships():
   """
   request is a special object that Flask provides to access web request information:
 
@@ -112,11 +112,18 @@ def index():
 
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
+  if request.method == "POST":
+    cname="Apple"
+    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE lower(cname)=%s", (request.form['cname'].lower(), ))
+    names = []
+    for result in cursor.fetchall():
+        names.append(result)
+    cursor.close()
 
-  # DEBUG: this is debugging code to see what request looks like
-  print(request.args)
-
-
+    #
+    context = dict(data = names)
+    return render_template("internships.html", **context)
+  #
   #
   # example of a database query
   #
@@ -127,39 +134,13 @@ def index():
   cursor.close()
 
   #
-  # Flask uses Jinja templates, which is an extension to HTML where you can
-  # pass data to a template and dynamically generate HTML based on the data
-  # (you can think of it as simple PHP)
-  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-  #
-  # You can see an example template in templates/index.html
-  #
-  # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be 
-  # accessible as a variable in index.html:
-  #
-  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-  #     <div>{{data}}</div>
-  #     
-  #     # creates a <div> tag for each element in data
-  #     # will print: 
-  #     #
-  #     #   <div>grace hopper</div>
-  #     #   <div>alan turing</div>
-  #     #   <div>ada lovelace</div>
-  #     #
-  #     {% for n in data %}
-  #     <div>{{n}}</div>
-  #     {% endfor %}
-  #
   context = dict(data = names)
+  return render_template("internships.html", **context)
 
-
-  #
-  # render_template looks in the templates/ folder for files.
-  # for example, the below file reads template/index.html
-  #
-  return render_template("index.html", **context)
+@app.route('/')
+def index():
+    context = dict()
+    return render_template("index.html", **context)
 
 #
 # This is an example of a different path.  You can see it at
@@ -184,10 +165,27 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+    if request.method == 'POST':
+        username = request.form['email']
+        password = request.form['password']
+        user = g.conn.execute(
+            'SELECT * FROM Users WHERE username = ?', (username,)
+        ).fetchone()
+        if user is None:
+            return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect User", show = True)
+        elif not check_password_hash(user['password'], password):
+            return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect Password", show = True)
+        session.clear()
+        session['user_id'] = username
+        return redirect(url_for('index.dashboard'))
+    return render_template('login.html', dsk="", input="", color="", errorText="", show = False)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('cs4111-Project1.index'))
 
 @app.route('/admin')
 def admin():

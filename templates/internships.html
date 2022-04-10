@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Home - tech.fyi{% endblock %}
+{% block content %}
+
+<div style="padding-right: 10%; padding-left: 10%;">
+	<h2>Internships</h2>
+          <div class="input-field col s12">
+		      <form class="center-align center" style="margin: 5% 10% 10% 10%" method="POST" action="/internships">
+
+            <input id="cname" name="cname">
+            <label for="cname">Company</label>
+	</form>  
+          </div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Company Name</th>
+      <th scope="col">City</th>
+      <th scope="col">State</th>
+      <th scope="col">Hourly</th>
+      <th scope="col">Bonus</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for n in data %}
+    <tr>
+      <td><a href="">{{ n['cname'] }}</a></td>
+      <td> {{ n['city'] }}</td>
+      <td> {{ n['state'] }} </td>
+      <td> {{ n['hourly'] }} </td>
+      <td> {{ n['bonus'] }} </td>
+    </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+    </div>
+
+{% endblock content %}
