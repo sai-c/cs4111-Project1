@@ -25,22 +25,17 @@
         });
 
     </script>
-    <script type="text/javascript" src="/static/js/materialize.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <ul id="dropdown1" class="dropdown-content">
-      <li><a href="/volunteer-signup">Volunteer</a></li>
-      <li class="divider"></li>
-      <li><a href="/agency-signup">Agency</a></li>
+      <li><a href="/signup">Sign Up</a></li>
     </ul>
     
     <ul id="dropdown2" class="dropdown-content">
-      <li><a href="/login">Volunteer</a></li>
+      <li><a href="/login">Login</a></li>
       <li class="divider"></li>
-      <li><a href="/agency-login">Agency</a></li>
-      <li class="divider"></li>
-      <li><a href="/admin-login">Admin</a></li>
 
     </ul>
-    
+
     <nav class="light-blue lighten-1">
       <div class="nav-wrapper container">
         <a href="/" id="logo-container" class="brand-logo">tech.fyi</a>
@@ -48,12 +43,10 @@
           <li><a class="dropdown-trigger" href="#!" data-target="dropdown1">Sign Up<i class="material-icons right">arrow_drop_down</i></a></li>
           <li><a class="dropdown-trigger" href="#!" data-target="dropdown2">Dashboard<i class="material-icons right">arrow_drop_down</i></a></li>
           {% if showLogout %}<li><a href="/logout">Logout</a></li>{% endif %}
-        </ul>
+          <li><a href="/internships">Internships</a></li>
+	</ul>
         <ul id="nav-mobile" class="sidenav">
-          <li><a href="/volunteer-signup">Volunteer Sign Up</a></li>
-          <li><a href="/agency-signup">Agency Sign Up</a></li>
-          <li><a href="/login">Volunteer Login</a></li>
-          <li><a href="/agency-login">Agency Login</a></li>
+		<li><a href="/agency-login">Login</a></li>
           {% if showLogout %}<li><a href="/logout">Logout</a></li>{% endif %}
         </ul>
       </div>

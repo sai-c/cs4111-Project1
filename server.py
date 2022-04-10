@@ -101,8 +101,8 @@ def teardown_request(exception):
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
-@app.route('/')
-def index():
+@app.route('/internships')
+def internships():
   """
   request is a special object that Flask provides to access web request information:
 
@@ -112,10 +112,6 @@ def index():
 
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
-
-  # DEBUG: this is debugging code to see what request looks like
-  print(request.args)
-
 
   #
   # example of a database query
@@ -159,7 +155,12 @@ def index():
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
+  return render_template("internships.html", **context)
+
+@app.route('/')
+def index():
+    context = dict()
+    return render_template("index.html", **context)
 
 #
 # This is an example of a different path.  You can see it at
@@ -184,10 +185,27 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+    if request.method == 'POST':
+        username = request.form['email']
+        password = request.form['password']
+        user = g.conn.execute(
+            'SELECT * FROM Users WHERE username = ?', (username,)
+        ).fetchone()
+        if user is None:
+            return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect User", show = True)
+        elif not check_password_hash(user['password'], password):
+            return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect Password", show = True)
+        session.clear()
+        session['user_id'] = username
+        return redirect(url_for('index.dashboard'))
+    return render_template('login.html', dsk="", input="", color="", errorText="", show = False)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('cs4111-Project1.index'))
 
 
 if __name__ == "__main__":
