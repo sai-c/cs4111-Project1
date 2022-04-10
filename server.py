@@ -127,7 +127,7 @@ def internships():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT * FROM Post_Intern")
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL")
   names = []
   for result in cursor:
     names.append(result)
@@ -186,6 +186,35 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('cs4111-Project1.index'))
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+
+  if request.method == 'POST':
+    print("FORM: ", request.form['pid'])
+    pid = request.form['pid']
+    cursor = g.conn.execute(
+"""UPDATE Post_Intern
+SET aid = 1
+WHERE pid = %s
+""", (pid,))
+    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid is NULL")
+    names = []
+    for result in cursor:
+      names.append(result)
+    cursor.close()
+
+    context = dict(data = names)
+    return render_template("admin.html", **context)
+
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NULL")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+
+  context = dict(data = names)
+  return render_template("admin.html", **context)
 
 
 if __name__ == "__main__":
