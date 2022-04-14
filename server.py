@@ -14,11 +14,12 @@ Go to http://localhost:8111 in your browser
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
+from werkzeug.security import check_password_hash, generate_password_hash
 
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, jsonify, session, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -139,7 +140,14 @@ def internships():
 
 @app.route('/')
 def index():
-    context = dict()
+    cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+    names = []
+    for result in cursor:
+      names.append(result)
+    cursor.close()
+
+    #
+    context = dict(data = names)
     return render_template("index.html", **context)
 
 #
@@ -164,6 +172,16 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
+@app.route('/post/<id>')
+def post(id):    
+  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE pid=%s", (id,))
+  return jsonify(cursor.fetchone())
+
+@app.route('/comments/<id>')
+def comments(id):
+  cursor = g.conn.execute("SELECT * FROM Comment WHERE pid=%s", (id,))
+  return jsonify(cursor.fetchall())
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -186,6 +204,29 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('cs4111-Project1.index'))
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = generate_password_hash(request.form['password'])
+        name = request.form['name']
+        yoe = request.form['yoe']
+        gender = request.form['gender']
+        education = request.form['education']
+
+        try:
+            cursor = g.conn.execute(
+                            "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, ?, ?, ?, ?)",
+                            (email, password, name, gender, yoe, education),
+            )
+            g.conn.commit()
+        except Exception as e:
+            print(e)
+            return render_template('signup.html', dsk="", input="", color="red", errorText="User already exists", show = True)
+
+        return render_template('signup.html', dsk="", input="", color="green", errorText="Successfully created", show = True)
+    return render_template('signup.html', dsk="", input="", color="", errorText="", show = False)
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

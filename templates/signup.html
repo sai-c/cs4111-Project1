@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up - tech.fyi{% endblock %}
+{% block content %}
+    <div class="row" style="margin: 5% 10% 10% 10%">
+    <form class="col s12" method="POST" action="/signup">
+        <div class="row">
+          <div class="input-field col s6">
+            <input placeholder="Your Email" id="email" type="email" name="email" class="validate">
+            <label for="email">Username</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="password" type="password" class="validate password" name="password">
+            <label for="password">Password</label>
+          </div>
+	  <div class="input-field col s6">
+            <input id="name" type="text" class="validate" name="name">
+            <label for="name">Full Name</label>
+          </div>
+	  <div class="input-field col s6">
+            <input id="yoe" type="number" class="validate" name="yoe">
+            <label for="yoe">Years of Experience</label>
+          </div>
+
+          <div class="input-field col s6">
+            <select name="gender" id="gender">
+                <option value="" disabled selected>Gender</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="O">Other</option>
+              <label>Gender</label>
+
+            </select>
+          </div>
+          <div class="input-field col s6">
+            <select name="education" id="education">
+            <option value="" disabled selected>Education Level</option>
+              <option value="BS">BS</option>
+              <option value="MS">MS</option>
+              <option value="BA">BA</option>
+              <option value="MA">MA</option>
+              <option value="PhD">PhD</option>
+              <option value="HS">HS</option>
+              <label>Education Level</label>
+            </select>
+          </div>
+  
+
+          <button class="waves-effect light-blue btn-large center">Sign Up</button>
+	</div>
+  </div>
+    
+{% endblock content %}

@@ -1,0 +1,4 @@
+Click==7.0
+Flask==1.1.1
+SQLAlchemy==1.4.26
+Werkzeug==0.16.1
