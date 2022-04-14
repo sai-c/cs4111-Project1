@@ -2,7 +2,7 @@
 {% block title %}Home - tech.fyi{% endblock %}
 {% block content %}
 <script type="text/javascript" src="{{url_for('static', filename='index.js')}}"></script>
-
+<link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
 <div class="section no-pad-bot" id="index-banner">
   <div class="container">
     <br><br>
@@ -43,7 +43,6 @@
         </tr>        
         <tr>
           <td id="{{ n['pid'] }}" colspan="6" style="display:none">
-
           </td>
         </tr>
     

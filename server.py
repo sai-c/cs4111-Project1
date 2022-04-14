@@ -18,8 +18,11 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 import os
 from sqlalchemy import *
+from sqlalchemy import exc
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, jsonify, session, url_for
+from psycopg2.errors import UniqueViolation, CheckViolation
+
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -138,17 +141,35 @@ def internships():
   context = dict(data = names)
   return render_template("internships.html", **context)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+  if request.method == 'POST':
+    content = request.form['comment']
+    cursor = g.conn.execute(
+                    "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
+                    (session['user_id'], request.form['pid'], content),
+    )
     cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
     names = []
     for result in cursor:
       names.append(result)
     cursor.close()
-
-    #
     context = dict(data = names)
-    return render_template("index.html", **context)
+    return render_template("index.html", **context, logged_in=True)
+
+  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+
+  #
+  context = dict(data = names)
+  if 'user_id' in session.keys():
+    return render_template("index.html", **context, logged_in=True)
+  else:
+    return render_template("index.html", **context, logged_in=False)
+
 
 #
 # This is an example of a different path.  You can see it at
@@ -164,13 +185,55 @@ def another():
 
 
 # Example of adding new data to the database
-@app.route('/add', methods=['POST'])
+@app.route('/add', methods=['GET', 'POST'])
 def add():
-  name = request.form['name']
-  print(name)
-  cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
+    if request.method == 'POST':
+        email = session['user_id']
+
+        role = request.form['role']
+        title = request.form['title']
+        level = request.form['level']
+        type = request.form['type']
+
+        city = request.form['city']
+        state = request.form['state']
+        base = request.form['base']
+        stock = request.form['stock']
+        bonus = request.form['bonus']
+        description = request.form['description']
+
+
+        '''
+        sname = g.conn.execute(
+                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
+                          (email, password, name, gender, yoe, education),
+          )
+        cname = g.conn.execute(
+                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
+                          (email, password, name, gender, yoe, education),
+          )
+        '''
+        '''
+        try:
+          cursor = g.conn.execute(
+                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
+                          (email, password, name, gender, yoe, education),
+          )
+        except exc.IntegrityError as e:
+          if isinstance(e.orig, UniqueViolation):
+            return render_template('add.html', dsk="", input="", color="red", errorText="User already exists", show = True)
+          if isinstance(e.orig, CheckViolation):
+            return render_template('add.html', dsk="", input="", color="red", errorText="Invalid input", show = True)
+        '''
+        specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+        specs = [x[0] for x in specs]
+
+        return render_template('add.html', dsk="", input="", color="green", errorText="Successfully created", show = True, specs = specs)
+    specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+    specs = [x[0] for x in specs]
+    companies = g.conn.execute("SELECT DISTINCT name FROM Company").fetchall()
+    return render_template('add.html', dsk="", input="", color="", errorText="", show = False, specs=specs, companies=companies)
+
 
 @app.route('/post/<id>')
 def post(id):    
@@ -183,27 +246,28 @@ def comments(id):
   return jsonify(cursor.fetchall())
 
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['email']
+        email = request.form['email']
         password = request.form['password']
         user = g.conn.execute(
-            'SELECT * FROM Users WHERE username = ?', (username,)
+            "SELECT * FROM Users WHERE email = %s", (email,)
         ).fetchone()
         if user is None:
             return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect User", show = True)
         elif not check_password_hash(user['password'], password):
             return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect Password", show = True)
         session.clear()
-        session['user_id'] = username
-        return redirect(url_for('index.dashboard'))
+        session['user_id'] = email
+        return redirect(url_for('index'))
     return render_template('login.html', dsk="", input="", color="", errorText="", show = False)
 
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('cs4111-Project1.index'))
+    return redirect(url_for('index'))
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -216,14 +280,16 @@ def signup():
         education = request.form['education']
 
         try:
-            cursor = g.conn.execute(
-                            "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, ?, ?, ?, ?)",
-                            (email, password, name, gender, yoe, education),
-            )
-            g.conn.commit()
-        except Exception as e:
-            print(e)
+          cursor = g.conn.execute(
+                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
+                          (email, password, name, gender, yoe, education),
+          )
+        except exc.IntegrityError as e:
+          if isinstance(e.orig, UniqueViolation):
             return render_template('signup.html', dsk="", input="", color="red", errorText="User already exists", show = True)
+          if isinstance(e.orig, CheckViolation):
+            return render_template('signup.html', dsk="", input="", color="red", errorText="Invalid input", show = True)
+ 
 
         return render_template('signup.html', dsk="", input="", color="green", errorText="Successfully created", show = True)
     return render_template('signup.html', dsk="", input="", color="", errorText="", show = False)
@@ -232,14 +298,15 @@ def signup():
 def admin():
 
   if request.method == 'POST':
+    aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
     print("FORM: ", request.form['pid'])
     pid = request.form['pid']
     cursor = g.conn.execute(
-"""UPDATE Post_Intern
-SET aid = 1
+"""UPDATE Post_FT
+SET aid = %s
 WHERE pid = %s
-""", (pid,))
-    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid is NULL")
+""", (aid, pid,))
+    cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid is NULL")
     names = []
     for result in cursor:
       names.append(result)
@@ -247,8 +314,12 @@ WHERE pid = %s
 
     context = dict(data = names)
     return render_template("admin.html", **context)
-
-  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NULL")
+  if 'user_id' not in session.keys():
+    return "Not Logged In"
+  cursor = g.conn.execute("SELECT * FROM Admin WHERE email=%s", (session['user_id'] ,))
+  if len(cursor.fetchall()) == 0:
+    return "Not Admin"
+  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NULL")
   names = []
   for result in cursor:
     names.append(result)
@@ -284,4 +355,6 @@ if __name__ == "__main__":
     app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)
 
 
+  app.secret_key = 'test'
   run()
+

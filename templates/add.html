@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Add Post - tech.fyi{% endblock %}
+{% block content %}
+<script>
+  $(document).ready(function(){
+    var companies = [
+        {% for company in companies %}
+            "{{companies}}",
+        {% endfor %}
+    ];
+    $( "#company" ).autocomplete({
+      source: companies
+    });
+    console.log(companies);
+  })
+  </script>
+
+    <div class="row" style="margin: 5% 10% 10% 10%">
+    <form class="col s12" method="POST" action="/add">
+      <div class="row">
+        <div class="input-field col s6">
+          <select name="role" id="role">
+            <option value="" disabled selected>Role</option>
+            <option value="Software Engineer">Software Engineer</option>
+            <option value="Software Engineering Manager">Software Engineering Manager</option>
+            <option value="Data Scientist">Data Scientist</option>
+            <label>Role</label>
+          </select>
+        </div>
+        <div class="row">
+          <div class="input-field col s6">
+            <select name="type" id="type">
+              <option value="" disabled selected>Type</option>
+              <option value="IC">IC</option>
+              <option value="L">L</option>
+              <option value="E">E</option>
+              <label>Type</label>
+            </select>
+          </div>
+          <div class="input-field col s6">
+            <input id="title" type="text" class="validate" name="title">
+            <label for="title">Title</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="level" type="number" class="validate" name="level">
+            <label for="level">Level</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="base" type="number" class="validate" name="base">
+            <label for="base">Base</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="stock" type="number" class="validate" name="stock">
+            <label for="stock">Stock</label>
+          </div>
+          <div class="input-field col s6">
+            <input id="bonus" type="number" class="validate" name="bonus">
+            <label for="bonus">Bonus</label>
+          </div>
+
+
+
+	        <div class="input-field col s6">
+            <input id="city" type="text" class="validate" name="city">
+            <label for="city">City</label>
+          </div>
+	        <div class="input-field col s6">
+            <input id="state" type="text" class="validate" name="state">
+            <label for="state">State</label>
+          </div>  
+	        <div class="input-field col s6">
+            <input id="description" type="text" class="validate" name="description">
+            <label for="description">Description</label>
+          </div>  
+
+          <div class="input-field col s6">
+            <select name="specialization" id="specialization">
+              <option value="" disabled selected>Specialization</option>
+              {% for n in specs %}
+                <option value="{{n}}">{{n}}</option>
+              {% endfor %}
+              <label>Specialization</label>
+            </select>
+          </div>
+	        <div class="input-field col s6">
+            <input id="company" type="text" class="validate" name="company">
+            <label for="company">Company</label>
+          </div>  
+
+          <button class="waves-effect light-blue btn-large center">Post</button>
+	</div>
+  </div>
+    
+{% endblock content %}
