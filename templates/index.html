@@ -28,18 +28,29 @@
           <th scope="col">Base Salary</th>
           <th scope="col">Stock</th>
           <th scope="col">Bonus</th>
+          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
     
         {% for n in data %}
-        <tr class="ftsalaryrow" id="ft{{ n['pid'] }}" data-pid="{{ n['pid'] }}" data-expanded="false">
-          <td><a href="">{{ n['cname'] }}</a></td>
+        <tr>
+          <td>
+            <form method="post" action="/companies" class="inline">
+              <input type="hidden" name="cname" value="{{ n['cname'] }}">
+              <button type="submit" name="submit_param" class="btn-small btn-flat light-blue">
+                {{ n['cname'] }}
+              </button>
+            </form>
+          
+          </td>
           <td> {{ n['city'] }}</td>
           <td> {{ n['state'] }} </td>
           <td> {{ n['base'] }} </td>
           <td> {{ n['stock'] }} </td>
           <td> {{ n['bonus'] }} </td>
+          <td> <button class="btn-small waves-effect waves-light red ftsalaryrow" id="ft{{ n['pid'] }}" data-pid="{{ n['pid'] }}" data-expanded="false">
+            View More</button> </td>
         </tr>        
         <tr>
           <td id="{{ n['pid'] }}" colspan="6" style="display:none">

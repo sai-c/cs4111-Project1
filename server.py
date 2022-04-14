@@ -141,6 +141,43 @@ def internships():
   context = dict(data = names)
   return render_template("internships.html", **context)
 
+@app.route('/companies', methods=['GET', 'POST'])
+def companies():
+  if request.method == "POST":
+    cname = request.form['cname']
+    cursor = g.conn.execute("SELECT * FROM Company WHERE name=%s", (cname))
+    results = list(cursor)[0]
+    cursor.close()
+
+    cursor = g.conn.execute("""
+      SELECT Benefit.title AS title, Benefit.description AS description FROM Benefit JOIN (
+      SELECT * FROM
+      Company JOIN Uses_Benefit ON Company.name=Uses_Benefit.name
+      WHERE Company.name=%s
+      ) AS C ON Benefit.title=C.title
+      """, (cname))
+    context = dict(company = results, benefits = list(cursor))
+    return render_template("company.html", **context)
+  cursor = g.conn.execute("SELECT * FROM Company")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+  context = dict(data = names)
+  return render_template("companies.html", **context)
+
+@app.route('/specializations', methods=['GET', 'POST'])
+def specializations():
+  cursor = g.conn.execute("SELECT * FROM Specializations")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+  context = dict(data = names)
+  return render_template("specializations.html", **context)
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
   if request.method == 'POST':
@@ -231,7 +268,9 @@ def add():
         return render_template('add.html', dsk="", input="", color="green", errorText="Successfully created", show = True, specs = specs)
     specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
     specs = [x[0] for x in specs]
-    companies = g.conn.execute("SELECT DISTINCT name FROM Company").fetchall()
+    companies = list(g.conn.execute("SELECT DISTINCT name FROM Company"))
+    print(companies)
+
     return render_template('add.html', dsk="", input="", color="", errorText="", show = False, specs=specs, companies=companies)
 
 

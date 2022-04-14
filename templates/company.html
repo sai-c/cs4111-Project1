@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Home - tech.fyi{% endblock %}
+{% block content %}
+
+<div style="padding-right: 10%; padding-left: 10%;">
+	<h2>{{company['name']}}</h2>
+    <div>{{company['description']}}</div>
+    <div>{{company['city']}}</div>
+    <div>{{company['state']}}</div>
+    <div>{{company['website']}}</div>
+
+    {% for n in benefits %}
+    <div>{{n['title']}}</div>
+    <div>{{n['description']}}</div>
+    {% endfor %}
+</div>
+
+{% endblock content %}

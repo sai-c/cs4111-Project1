@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Home - tech.fyi{% endblock %}
+{% block content %}
+
+<div style="padding-right: 10%; padding-left: 10%;">
+	<h2>Companies</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Company Name</th>
+      <th scope="col">City</th>
+      <th scope="col">State</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for n in data %}
+    <tr>
+      <td><a href="">{{ n['name'] }}</a></td>
+      <td> {{ n['city'] }}</td>
+      <td> {{ n['state'] }} </td>
+      <td><form method="post" action="/companies" class="inline">
+        <input type="hidden" name="cname" value="{{ n['name'] }}">
+        <button type="submit" name="submit_param" class="btn-small waves-effect waves-light red">
+          View More
+        </button>
+      </form>
+    </td>
+          </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+    </div>
+
+{% endblock content %}
