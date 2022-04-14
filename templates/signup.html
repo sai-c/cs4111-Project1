@@ -34,12 +34,9 @@
           <div class="input-field col s6">
             <select name="education" id="education">
             <option value="" disabled selected>Education Level</option>
-              <option value="BS">BS</option>
-              <option value="MS">MS</option>
-              <option value="BA">BA</option>
-              <option value="MA">MA</option>
-              <option value="PhD">PhD</option>
-              <option value="HS">HS</option>
+            {% for n in edu %}
+              <option value="{{n}}">{{n}}</option>
+            {% endfor %}
               <label>Education Level</label>
             </select>
           </div>

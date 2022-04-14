@@ -168,7 +168,7 @@ def companies():
 
 @app.route('/specializations', methods=['GET', 'POST'])
 def specializations():
-  cursor = g.conn.execute("SELECT * FROM Specializations")
+  cursor = g.conn.execute("SELECT * FROM Specialization")
   names = []
   for result in cursor:
     names.append(result)
@@ -181,6 +181,8 @@ def specializations():
 @app.route('/', methods=['GET', 'POST'])
 def index():
   if request.method == 'POST':
+    if 'user_id' not in session.keys():
+      return redirect(url_for('login'))
     content = request.form['comment']
     cursor = g.conn.execute(
                     "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
@@ -238,17 +240,39 @@ def add():
         stock = request.form['stock']
         bonus = request.form['bonus']
         description = request.form['description']
+        specialization = request.form['specialization']
+        company = request.form['company']
+
+        level2 = g.conn.execute(
+          "SELECT * FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
+          (title, level, role, type)
+        )
+        if len(list(level2)) == 0:
+          level2 = g.conn.execute(
+            "INSERT INTO Level VALUES (DEFAULT, %s, %s, %s, %s)",
+            (role, title, level, type)
+          )
+
+        lid = g.conn.execute(
+          "SELECT id FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
+          (title, level, role, type)
+        )
+        lid = list(lid)[0][0]
+        addcompany = g.conn.execute(
+            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s)",
+            (company, city, state)
+        )
+        linking = g.conn.execute(
+                          "INSERT INTO Uses_Level VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                          (company, lid),
+        )
+        post = g.conn.execute("""INSERT INTO Post_FT(pid, aid, email, lid, city, state, base, stock, bonus, sname, cname, timestamp, description)
+VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, now(), %s);""",
+                          (session['user_id'], lid, city, state, base, stock, bonus, specialization, company, description),
+        )
 
 
         '''
-        sname = g.conn.execute(
-                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
-                          (email, password, name, gender, yoe, education),
-          )
-        cname = g.conn.execute(
-                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
-                          (email, password, name, gender, yoe, education),
-          )
         '''
         '''
         try:
@@ -269,8 +293,8 @@ def add():
     specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
     specs = [x[0] for x in specs]
     companies = list(g.conn.execute("SELECT DISTINCT name FROM Company"))
+    companies = [x[0] for x in companies]
     print(companies)
-
     return render_template('add.html', dsk="", input="", color="", errorText="", show = False, specs=specs, companies=companies)
 
 
@@ -328,7 +352,6 @@ def signup():
             return render_template('signup.html', dsk="", input="", color="red", errorText="User already exists", show = True)
           if isinstance(e.orig, CheckViolation):
             return render_template('signup.html', dsk="", input="", color="red", errorText="Invalid input", show = True)
- 
 
         return render_template('signup.html', dsk="", input="", color="green", errorText="Successfully created", show = True)
     return render_template('signup.html', dsk="", input="", color="", errorText="", show = False)
