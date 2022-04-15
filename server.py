@@ -166,12 +166,21 @@ def companies():
       """, (cname))
 
     chart_data = list(cursor)
+
+    cursor = g.conn.execute("""
+      SELECT AVG(base + stock + bonus) FROM Post_FT 
+      WHERE Post_FT.cname=%s
+      """, (cname))
+    medcomp = round(list(cursor)[0][0], 2)
+    medcomp = "${:,.2f}".format(medcomp)
+
+
     chart_data = sorted(chart_data, key=lambda x: x[3] + str(x[4]))
     labels = [x[3] + str(x[4]) for x in chart_data]
     dataset1 = [x[0] for x in chart_data]
     dataset2 = [x[1] for x in chart_data]
     dataset3 = [x[2] for x in chart_data]
-    context = dict(company = results, benefits = benefits, dataset1=dataset1, dataset2=dataset2, dataset3=dataset3, labels = labels)
+    context = dict(company = results, benefits = benefits, dataset1=dataset1, dataset2=dataset2, dataset3=dataset3, labels = labels, medcomp=medcomp)
     return render_template("company.html", **context)
   cursor = g.conn.execute("SELECT * FROM Company")
   names = []
@@ -186,6 +195,14 @@ def specializations():
   spec='Machine Learning'
   if request.method == "POST":
     spec = request.form['specialization']
+
+  cursor = g.conn.execute("""
+    SELECT AVG(base + stock + bonus) FROM Post_FT 
+    WHERE Post_FT.sname=%s
+    """, (spec))
+  medcomp = round(list(cursor)[0][0], 2)
+  medcomp = "${:,.2f}".format(medcomp)
+
   cursor = g.conn.execute("SELECT * FROM Specialization")
   names = []
   for result in cursor:
@@ -205,7 +222,7 @@ def specializations():
   specs = [x[0] for x in specs]
   desc = g.conn.execute("SELECT description FROM Specialization WHERE name=%s", (spec)).fetchone()
   desc = list(desc)[0]
-  context = dict(data = names, salaries=salaries, labels=labels, specs=specs, spec=spec, description=desc)
+  context = dict(data = names, salaries=salaries, labels=labels, specs=specs, spec=spec, description=desc, medcomp=medcomp)
   return render_template("specializations.html", **context)
 
 
@@ -229,9 +246,9 @@ def index():
       cursor.close()
       context = dict(data = names)
       if 'user_id' in session.keys():
-        return render_template("index.html", **context, logged_in=True, a=a, n=n, x=pageno)
+        return render_template("index.html", **context, a=a, n=n, x=pageno)
       else:
-        return render_template("index.html", **context, logged_in=False, a=a, n=n, x=pageno)
+        return render_template("index.html", **context, a=a, n=n, x=pageno)
 
     elif 'comment' in request.form.keys():
       if 'user_id' not in session.keys():
@@ -248,7 +265,7 @@ def index():
         names.append(result)
       cursor.close()
       context = dict(data = names)
-      return render_template("index.html", **context, logged_in=True)
+      return render_template("index.html", **context)
     # filtering posts
     else:
       loc = ''
@@ -316,7 +333,7 @@ def index():
         names.append(result)
       cursor.close()
       context = dict(data = names)
-      return render_template("index.html", **context, logged_in=True, a=0, n=0, x=0)
+      return render_template("index.html", **context, a=0, n=0, x=0)
 
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
   names = []
@@ -337,9 +354,9 @@ def index():
 
   context = dict(data = names)
   if 'user_id' in session.keys():
-    return render_template("index.html", **context, logged_in=True, a=a,n=n)
+    return render_template("index.html", **context, a=a,n=n)
   else:
-    return render_template("index.html", **context, logged_in=False, a=a, n= n)
+    return render_template("index.html", **context, a=a, n= n)
 
 
 #
