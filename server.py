@@ -388,7 +388,7 @@ def add():
           specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
           specs = [x[0] for x in specs]
 
-          return render_template('add.html', dsk="", input="", color="red", errorText="Not Logged In", show = True, specs = specs)
+          return render_template('add.html', dsk="", input="", color="red", errorText="Invalid or Empty Input", show = True, specs = specs)
 
       if 'user_id' not in session.keys():
           specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
