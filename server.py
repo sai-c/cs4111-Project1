@@ -14,6 +14,7 @@ Go to http://localhost:8111 in your browser
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
+from openpyxl import load_workbook
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import os
@@ -183,18 +184,88 @@ def index():
   if request.method == 'POST':
     if 'user_id' not in session.keys():
       return redirect(url_for('login'))
-    content = request.form['comment']
-    cursor = g.conn.execute(
-                    "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
-                    (session['user_id'], request.form['pid'], content),
-    )
-    cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
-    names = []
-    for result in cursor:
-      names.append(result)
-    cursor.close()
-    context = dict(data = names)
-    return render_template("index.html", **context, logged_in=True)
+    
+    if 'comment' in request.form.keys():
+      content = request.form['comment']
+      cursor = g.conn.execute(
+                      "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
+                      (session['user_id'], request.form['pid'], content),
+      )
+      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+      names = []
+      for result in cursor:
+        names.append(result)
+      cursor.close()
+      context = dict(data = names)
+      return render_template("index.html", **context, logged_in=True)
+    # filtering posts
+    else:
+      loc = ''
+      exp = '' 
+      gdr = '' 
+      edu = ''
+      if 'group1' in request.form.keys():
+        loc = request.form['group1']
+      if 'group2' in request.form.keys():  
+        exp = request.form['group2']
+      if 'group3' in request.form.keys():  
+        gdr = request.form['group3']
+      if 'group4' in request.form.keys():  
+        edu = request.form['group4']
+
+      print(f"loc: {loc}\nexp: {exp}\ngdr: {gdr}\nedu: {edu}\n")
+      q = """SELECT * FROM Post_FT JOIN Users ON Post_FT.email = Users.email 
+      WHERE aid IS NOT NULL
+      """
+      tup = ()
+      if loc:
+        q += " AND Post_FT.city = %s"
+        tup += (loc,)
+      
+      if exp:
+
+        if exp == "New Grad":
+          low = 0
+          high = 1
+        
+        if exp == "Mid Level":
+          low = 2
+          high = 4
+        
+        if exp == "Senior Level":
+          low = 5
+          high = 10
+
+        q += " AND Users.yoe BETWEEN %s AND %s"
+        tup += (low, high,)
+
+      if gdr:
+        q += " AND Users.gender = %s"
+        tup += (gdr, )
+
+      if edu:
+        if edu == "Bachelors":
+          first = "BS"
+          second = "BA"
+
+        if edu == "Masters":
+          first = "MA"
+          second = "MS"
+
+        if edu == "Doctorate":
+          first = "PhD"
+          second = "PhD"
+
+        q += " AND (Users.education = %s OR Users.education = %s)"
+        tup += (first, second,)
+
+      cursor = g.conn.execute(q, tup)
+      names = []
+      for result in cursor:
+        names.append(result)
+      cursor.close()
+      context = dict(data = names)
+      return render_template("index.html", **context, logged_in=True)
 
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
   names = []
