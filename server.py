@@ -456,7 +456,7 @@ def add():
       if request.form['form-type'] == "intern":
         required_keys = ['base', 'bonus', 'city', 'state', 'company']
         for key in required_keys:
-          if key not in request.form.keys():
+          if key not in request.form.keys() or len(request.form[key]) == 0:
             specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
             specs = [x[0] for x in specs]
 
