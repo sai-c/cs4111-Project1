@@ -270,8 +270,10 @@ def index():
         for result in cursor:
           names.append(result)
         cursor.close()
+        n = min(math.ceil(len(names) / 10), 10)
+        a = 1
         context = dict(data = names)
-        return render_template("index.html", **context)
+        return render_template("index.html", **context, a=a, n=n)
     # filtering posts
     else:
       loc = ''
