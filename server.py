@@ -382,14 +382,6 @@ def another():
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
-      required_keys = ['role', 'type', 'title', 'level', 'base', 'stock', 'bonus', 'city', 'state', 'description', 'specialization', 'company']
-      for key in required_keys:
-        if key not in request.form.keys():
-          specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
-          specs = [x[0] for x in specs]
-
-          return render_template('add.html', dsk="", input="", color="red", errorText="Invalid or Empty Input", show = True, specs = specs)
-
       if 'user_id' not in session.keys():
           specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
           specs = [x[0] for x in specs]
@@ -397,6 +389,14 @@ def add():
           return render_template('add.html', dsk="", input="", color="red", errorText="Not Logged In", show = True, specs = specs)
 
       if request.form['form-type'] == "ft":
+        required_keys = ['role', 'type', 'title', 'level', 'base', 'stock', 'bonus', 'city', 'state', 'specialization', 'company']
+        for key in required_keys:
+          if key not in request.form.keys():
+            specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+            specs = [x[0] for x in specs]
+
+            return render_template('add.html', dsk="", input="", color="red", errorText="Invalid or Empty Input", show = True, specs = specs)
+
         email = session['user_id']
         role = request.form['role']
         title = request.form['title']
@@ -445,6 +445,14 @@ def add():
           return render_template('add.html', dsk="", input="", color="red", errorText="Error inserting into database", show = True, specs = specs)
 
       if request.form['form-type'] == "intern":
+        required_keys = ['hourly', 'bonus', 'city', 'state', 'company', 'description']
+        for key in required_keys:
+          if key not in request.form.keys():
+            specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+            specs = [x[0] for x in specs]
+
+            return render_template('add.html', dsk="", input="", color="red", errorText="Invalid or Empty Input", show = True, specs = specs)
+
         email = session['user_id']
         city = request.form['city']
         state = request.form['state']
