@@ -168,6 +168,9 @@ def companies():
       """, (cname))
 
     chart_data = list(cursor)
+    if len(chart_data) == 0:
+      context = dict(company = results, benefits = benefits, dataset1=None, dataset2=None, dataset3=None, labels = None, medcomp="Not Available")
+      return render_template("company.html", **context)
 
     cursor = g.conn.execute("""
       SELECT AVG(base + stock + bonus) FROM Post_FT 

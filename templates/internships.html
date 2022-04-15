@@ -25,7 +25,14 @@
 
     {% for n in data %}
     <tr>
-      <td><a href="">{{ n['cname'] }}</a></td>
+      <td>
+        <form method="post" action="/companies" class="inline">
+          <input type="hidden" name="cname" value="{{ n['cname'] }}">
+          <button type="submit" name="submit_param" class="btn-small btn-flat light-blue">
+            {{ n['cname'] }}
+          </button>
+        </form>
+      </td>
       <td> {{ n['city'] }}</td>
       <td> {{ n['state'] }} </td>
       <td> {{ n['hourly'] }} </td>
