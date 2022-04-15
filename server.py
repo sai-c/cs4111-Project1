@@ -41,8 +41,8 @@ app = Flask(__name__, template_folder=tmpl_dir)
 # For your convenience, we already set it to the class database
 
 # Use the DB credentials you received by e-mail
-DB_USER = "vhc2109"
-DB_PASSWORD = "2008"
+DB_USER = "bg2751"
+DB_PASSWORD = "1733"
 
 DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
@@ -181,11 +181,11 @@ def specializations():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-  if request.method == 'POST':
-    if 'user_id' not in session.keys():
-      return redirect(url_for('login'))
-    
+  if request.method == 'POST':    
     if 'comment' in request.form.keys():
+      if 'user_id' not in session.keys():
+        return redirect(url_for('login'))
+
       content = request.form['comment']
       cursor = g.conn.execute(
                       "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",

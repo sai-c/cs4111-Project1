@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Home - tech.fyi{% endblock %}
 {% block content %}
+
 <script type="text/javascript" src="{{url_for('static', filename='index.js')}}"></script>
 <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
 <div class="section no-pad-bot" id="index-banner">
@@ -15,10 +16,15 @@
     </div>
     <br><br>
 
-    <div style="padding-right: 10%; padding-left: 10%;" id="salaries">
+    <div id="salaries">
       <h2>Full-Time Salaries</h2>
-
-      <form method="POST" action="/">
+      <h5>Filter</h5>
+      <form method="POST" action="/" id="filterform">
+        
+        <div class="container">
+          
+          <div class="row">
+        <div class="col s3">
         <p>
           <label>
             <input value="New York"class="with-gap" name="group1" type="radio" />
@@ -37,6 +43,8 @@
             <span>LA</span>
           </label>
         </p>
+      </div>
+      <div class="col s3">
         <p>
           <label>
             <input value="New Grad" class="with-gap" name="group2" type="radio" />
@@ -55,6 +63,9 @@
             <span>Senior Level</span>
           </label>
         </p>
+      </div>
+      <div class="col s3">
+
         <p>
           <label>
             <input value="M" class="with-gap" name="group3" type="radio" />
@@ -73,6 +84,9 @@
             <span>Other</span>
           </label>
         </p>
+      </div>
+      <div class="col s3">
+
         <p>
           <label>
             <input value="Bachelors" class="with-gap" name="group4" type="radio" />
@@ -91,7 +105,16 @@
             <span>Doctorate</span>
           </label>
         </p>
-        <input type="submit">
+        </div>
+      </div>
+      <div class="col s12" style="text-align:center">
+        <button type="submit" name="submit_param" class="btn-small btn-flat light-blue">
+          Apply Filter
+        </button>
+      </div>
+
+
+      </div>
       </form>
 
     <table class="table">

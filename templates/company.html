@@ -8,11 +8,18 @@
     <div>{{company['city']}}</div>
     <div>{{company['state']}}</div>
     <div>{{company['website']}}</div>
-
-    {% for n in benefits %}
-    <div>{{n['title']}}</div>
-    <div>{{n['description']}}</div>
-    {% endfor %}
-</div>
+    <div class="row">
+        {% for n in benefits %}
+        <div class="col s4">
+          <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+              <span class="card-title">{{n['title']}}</span>
+              <p>{{n['description']}}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
 
 {% endblock content %}
