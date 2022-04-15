@@ -382,6 +382,14 @@ def another():
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
+      required_keys = ['role', 'type', 'title', 'level', 'base', 'stock', 'bonus', 'city', 'state', 'description', 'specialization', 'company']
+      for key in required_keys:
+        if key not in request.form.keys():
+          specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+          specs = [x[0] for x in specs]
+
+          return render_template('add.html', dsk="", input="", color="red", errorText="Not Logged In", show = True, specs = specs)
+
       if 'user_id' not in session.keys():
           specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
           specs = [x[0] for x in specs]
