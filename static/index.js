@@ -1,4 +1,6 @@
 $(document).ready(function(){
+    $('.collapsible').collapsible();
+
     $(document).on("click", ".ftsalaryrow", function () {
         console.log( $(this).attr("data-pid"))
         let test = $(this).attr("data-pid")
