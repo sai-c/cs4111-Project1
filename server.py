@@ -183,24 +183,29 @@ def companies():
 
 @app.route('/specializations', methods=['GET', 'POST'])
 def specializations():
+  spec='Machine Learning'
   if request.method == "POST":
-    name = request.form['name']
-    cursor = g.conn.execute("SELECT * FROM Specialization WHERE name=%s", (name))
-    results = list(cursor)[0]
-    cursor.close()
-
-    cursor = g.conn.execute("""
-      SELECT * FROM Post_FT JOIN Specialization ON Post_FT.sname = Specialization.name
-      WHERE Specialization.name=%s
-      """, (name))
-    context = dict(specialization = results, posts = list(cursor))
-    return render_template("specialization.html", **context)
+    spec = request.form['specialization']
   cursor = g.conn.execute("SELECT * FROM Specialization")
   names = []
   for result in cursor:
     names.append(result)
   cursor.close()
-  context = dict(data = names)
+  cursor = g.conn.execute("""
+      SELECT ROUND(base + stock + bonus, -4) AS bucket, COUNT(*) as count
+      FROM Post_FT
+      WHERE Post_FT.sname=%s
+      GROUP BY bucket
+      ORDER BY 1
+      """, (spec, ))
+  salaries = list(cursor)
+  labels = [x[0] for x in salaries]
+  salaries = [x[1] for x in salaries]
+  specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+  specs = [x[0] for x in specs]
+  desc = g.conn.execute("SELECT description FROM Specialization WHERE name=%s", (spec)).fetchone()
+  desc = list(desc)[0]
+  context = dict(data = names, salaries=salaries, labels=labels, specs=specs, spec=spec, description=desc)
   return render_template("specializations.html", **context)
 
 

@@ -4,31 +4,46 @@
 
 <div style="padding-right: 10%; padding-left: 10%;">
 	<h2>Specializations</h2>
-    <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Descriptions</th>
-          </tr>
-        </thead>
-        <tbody>
-      
-          {% for n in data %}
-          <tr>
-            <td>{{ n['name'] }}</td>
-            <td> {{ n['description'] }}</td>
-            <td>
-              <form method="post" action="/specializations" class="inline">
-                <input type="hidden" name="name" value="{{ n['name'] }}">
-                <button type="submit" name="submit_param" class="btn-small waves-effect waves-light red">
-                  View More
-                </button>
-              </form>
-            </td>
-          </tr>
+    <script type="text/javascript" src="{{url_for('static', filename='specializations.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let salaries = {{salaries|tojson}}
+        let labels = {{labels|tojson}}
+    </script>
+    <form action="/specializations" id="specform" method="post">
+    <div class="input-field col s6">
+        <select name="specialization" id="specialization">
+          <option value="" disabled selected>Specialization</option>
+          {% for n in specs %}
+            <option {% if n == spec %}{{'selected'}}{% endif %} value="{{n}}">{{n}}</option>
           {% endfor %}
-          </tbody>
-      </table>
+          <label>Specialization</label>
+        </select>
+      </div>
+    </form>
+    <canvas id="myChart" width="800" height="400"></canvas> 
+    {% if description %}
+    <h5>Description</h5>
+    {{description}}
+    {% endif %}
+    <form action="/specializations" class="specselectform" method="post">
+    <div class="row">
+        <h4>All Specializations</h4>
+        {% for n in data %}
+        <input type="hidden" id="spec2" name="specialization" value="">
+        <a class="specselect" href="#!" data-val="{{n['name']}}">
+        <div class="col s4">
+          <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+              <span class="card-title">{{n['name']}}</span>
+            </div>
+          </div>
+        </div>
+        </a>
+        {% endfor %}
+      </div>
+    </form>
+
       </div>
 
 {% endblock content %}
