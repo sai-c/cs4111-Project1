@@ -17,6 +17,14 @@
           <tr>
             <td>{{ n['name'] }}</td>
             <td> {{ n['description'] }}</td>
+            <td>
+              <form method="post" action="/specializations" class="inline">
+                <input type="hidden" name="name" value="{{ n['name'] }}">
+                <button type="submit" name="submit_param" class="btn-small waves-effect waves-light red">
+                  View More
+                </button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
           </tbody>
