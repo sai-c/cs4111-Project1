@@ -83,7 +83,8 @@ $(document).ready(function(){
 
         }
         else {
-            $("#" + test).html("")
+            $("#" + test + " #comments").html("")
+            $("#" + test + " #post").html("")
             $("#ft" + test).attr("data-expanded", "false")
             $("#" + test).css("display", "none")
         }
