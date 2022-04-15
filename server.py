@@ -169,6 +169,18 @@ def companies():
 
 @app.route('/specializations', methods=['GET', 'POST'])
 def specializations():
+  if request.method == "POST":
+    name = request.form['name']
+    cursor = g.conn.execute("SELECT * FROM Specialization WHERE name=%s", (name))
+    results = list(cursor)[0]
+    cursor.close()
+
+    cursor = g.conn.execute("""
+      SELECT * FROM Post_FT JOIN Specialization ON Post_FT.sname = Specialization.name
+      WHERE Specialization.name=%s
+      """, (name))
+    context = dict(specialization = results, posts = list(cursor))
+    return render_template("specialization.html", **context)
   cursor = g.conn.execute("SELECT * FROM Specialization")
   names = []
   for result in cursor:
