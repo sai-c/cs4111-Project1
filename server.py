@@ -118,8 +118,7 @@ def internships():
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
   if request.method == "POST":
-    cname="Apple"
-    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE lower(cname)=%s", (request.form['cname'].lower(), ))
+    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL AND lower(cname)=%s", (request.form['cname'].lower(), ))
     names = []
     for result in cursor.fetchall():
         names.append(result)
@@ -132,7 +131,7 @@ def internships():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL")
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL ORDER BY hourly DESC")
   names = []
   for result in cursor:
     names.append(result)
@@ -145,6 +144,18 @@ def internships():
 @app.route('/companies', methods=['GET', 'POST'])
 def companies():
   if request.method == "POST":
+
+    if 'search' in request.form.keys():
+      cursor = g.conn.execute("SELECT * FROM Company WHERE lower(name)=%s", (request.form['search'].lower(), ))
+      names = []
+      for result in cursor.fetchall():
+          names.append(result)
+      cursor.close()
+
+      #
+      context = dict(data = names)
+      return render_template("companies.html", **context)
+
     cname = request.form['cname']
     cursor = g.conn.execute("SELECT * FROM Company WHERE name=%s", (cname))
     results = list(cursor)[0]
