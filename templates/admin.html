@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Sign Up - tech.fyi{% endblock %}
+{% block title %}Admin - tech.fyi{% endblock %}
 {% block content %}
   <div style="padding-right: 10%; padding-left: 10%;">
 	<h2>Admin Approval</h2>
@@ -32,7 +32,7 @@
                 <td> {{ n['bonus'] }} </td>
                 <td> {{ n['timestamp'] }} </td>
                 <td> {{ n['description'] }} </td>
-                <td> <form method="POST" action="/admin"> <input type="text" name="pid" type="hidden" value="{{ n['pid'] }}" /> <input type="text" name="type" type="hidden" value="ft" /> <button>yes</button></form> </td>
+                <td> <form method="POST" action="/admin"> <input name="pid" type="hidden" value="{{ n['pid'] }}" /> <input name="type" type="hidden" value="ft" /> <button class="waves-effect light-blue btn-small center">Yes</button></form> </td>
               </tr>
   
       {% endfor %}
@@ -64,7 +64,7 @@
         <td> {{ n['state'] }} </td>
         <td> {{ n['hourly'] }} </td>
         <td> {{ n['bonus'] }} </td>
-        <td> <form method="POST" action="/admin"> <input type="text" name="pid" type="hidden" value="{{ n['pid'] }}" /> <input type="text" name="type" type="hidden" value="intern" /> <button>yes</button></form> </td>
+        <td> <form method="POST" action="/admin"> <input name="pid" type="hidden" value="{{ n['pid'] }}" /> <input name="type" type="hidden" value="intern" /> <button class="waves-effect light-blue btn-small center">yes</button></form> </td>
       </tr>
   
       {% endfor %}

@@ -248,26 +248,27 @@ def index():
       cursor.close()
       context = dict(data = names)
       if 'user_id' in session.keys():
-        return render_template("index.html", **context, a=a, n=n, x=pageno)
+        return render_template("index.html", **context, a=a, n=n, x=int(pageno))
       else:
-        return render_template("index.html", **context, a=a, n=n, x=pageno)
+        return render_template("index.html", **context, a=a, n=n, x=int(pageno))
 
     elif 'comment' in request.form.keys():
       if 'user_id' not in session.keys():
         return redirect(url_for('login'))
 
       content = request.form['comment']
-      cursor = g.conn.execute(
-                      "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
-                      (session['user_id'], request.form['pid'], content),
-      )
-      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
-      names = []
-      for result in cursor:
-        names.append(result)
-      cursor.close()
-      context = dict(data = names)
-      return render_template("index.html", **context)
+      if len(content) > 0:
+        cursor = g.conn.execute(
+                        "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
+                        (session['user_id'], request.form['pid'], content),
+        )
+        cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+        names = []
+        for result in cursor:
+          names.append(result)
+        cursor.close()
+        context = dict(data = names)
+        return render_template("index.html", **context)
     # filtering posts
     else:
       loc = ''
@@ -356,9 +357,9 @@ def index():
 
   context = dict(data = names)
   if 'user_id' in session.keys():
-    return render_template("index.html", **context, a=a,n=n)
+    return render_template("index.html", **context, a=a,n=n, x=1)
   else:
-    return render_template("index.html", **context, a=a, n= n)
+    return render_template("index.html", **context, a=a, n=n, x=1)
 
 
 #
@@ -392,34 +393,39 @@ def add():
         description = request.form['description']
         specialization = request.form['specialization']
         company = request.form['company']
-
-        level2 = g.conn.execute(
-          "SELECT * FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
-          (title, level, role, type)
-        )
-        if len(list(level2)) == 0:
+        try:
           level2 = g.conn.execute(
-            "INSERT INTO Level VALUES (DEFAULT, %s, %s, %s, %s)",
-            (role, title, level, type)
+            "SELECT * FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
+            (title, level, role, type)
           )
+          if len(list(level2)) == 0:
+            level2 = g.conn.execute(
+              "INSERT INTO Level VALUES (DEFAULT, %s, %s, %s, %s)",
+              (role, title, level, type)
+            )
 
-        lid = g.conn.execute(
-          "SELECT id FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
-          (title, level, role, type)
-        )
-        lid = list(lid)[0][0]
-        addcompany = g.conn.execute(
-            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
-            (company, city, state)
-        )
-        linking = g.conn.execute(
-                          "INSERT INTO Uses_Level VALUES (%s, %s) ON CONFLICT DO NOTHING",
-                          (company, lid),
-        )
-        post = g.conn.execute("""INSERT INTO Post_FT(pid, aid, email, lid, city, state, base, stock, bonus, sname, cname, timestamp, description)
-VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, now(), %s);""",
-                          (session['user_id'], lid, city, state, base, stock, bonus, specialization, company, description),
-        )
+          lid = g.conn.execute(
+            "SELECT id FROM Level WHERE title=%s AND level=%s AND role=%s AND type=%s",
+            (title, level, role, type)
+          )
+          lid = list(lid)[0][0]
+          addcompany = g.conn.execute(
+              "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
+              (company, city, state)
+          )
+          linking = g.conn.execute(
+                            "INSERT INTO Uses_Level VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                            (company, lid),
+          )
+          post = g.conn.execute("""INSERT INTO Post_FT(pid, aid, email, lid, city, state, base, stock, bonus, sname, cname, timestamp, description)
+  VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, now(), %s);""",
+                            (session['user_id'], lid, city, state, base, stock, bonus, specialization, company, description),
+          )
+        except:
+          specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+          specs = [x[0] for x in specs]
+
+          return render_template('add.html', dsk="", input="", color="red", errorText="Error inserting into database", show = True, specs = specs)
 
       if request.form['form-type'] == "intern":
         email = session['user_id']
@@ -429,17 +435,20 @@ VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, now(), %s);""",
         bonus = request.form['bonus']
         description = request.form['description']
         company = request.form['company']
+        try:
+          addcompany = g.conn.execute(
+              "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
+              (company, city, state)
+          )
+          post = g.conn.execute("""INSERT INTO Post_Intern(pid, aid, email, city, state, hourly, bonus, cname, timestamp, description)
+  VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, now(), %s);""",
+                            (session['user_id'], city, state, hourly, bonus, company, description),
+          )
+        except:
+          specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+          specs = [x[0] for x in specs]
 
-        addcompany = g.conn.execute(
-            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
-            (company, city, state)
-        )
-        post = g.conn.execute("""INSERT INTO Post_Intern(pid, aid, email, city, state, hourly, bonus, cname, timestamp, description)
-VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, now(), %s);""",
-                          (session['user_id'], city, state, hourly, bonus, company, description),
-        )
-
-
+          return render_template('add.html', dsk="", input="", color="red", errorText="Error inserting into database", show = True, specs = specs)
 
       specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
       specs = [x[0] for x in specs]
@@ -497,6 +506,10 @@ def logout():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+        required_keys = ['email', 'password', 'name', 'yoe', 'gender', 'education']
+        for key in required_keys:
+          if key not in request.form.keys():
+            return render_template('signup.html', dsk="", input="", color="red", errorText="Empty fields", show = True)
         email = request.form['email']
         password = generate_password_hash(request.form['password'])
         name = request.form['name']
@@ -559,7 +572,7 @@ def admin():
     return "Not Logged In"
   cursor = g.conn.execute("SELECT * FROM Admin WHERE email=%s", (session['user_id'] ,))
   if len(cursor.fetchall()) == 0:
-    return "Not Admin"
+    return redirect(url_for('index'))
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid is NULL")
   ft_data = list(cursor)
   cursor.close()
