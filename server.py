@@ -157,7 +157,21 @@ def companies():
       WHERE Company.name=%s
       ) AS C ON Benefit.title=C.title
       """, (cname))
-    context = dict(company = results, benefits = list(cursor))
+    benefits=list(cursor)
+
+    cursor = g.conn.execute("""
+      SELECT AVG(base), AVG(stock), AVG(bonus), type, level FROM Post_FT JOIN Uses_Level ON Post_FT.lid=Uses_Level.lid JOIN Level ON Uses_Level.lid = Level.id
+      WHERE Post_FT.cname=%s
+      GROUP BY type, level
+      """, (cname))
+
+    chart_data = list(cursor)
+    chart_data = sorted(chart_data, key=lambda x: x[3] + str(x[4]))
+    labels = [x[3] + str(x[4]) for x in chart_data]
+    dataset1 = [x[0] for x in chart_data]
+    dataset2 = [x[1] for x in chart_data]
+    dataset3 = [x[2] for x in chart_data]
+    context = dict(company = results, benefits = benefits, dataset1=dataset1, dataset2=dataset2, dataset3=dataset3, labels = labels)
     return render_template("company.html", **context)
   cursor = g.conn.execute("SELECT * FROM Company")
   names = []
