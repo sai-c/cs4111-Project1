@@ -227,13 +227,12 @@ def another():
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
+      if request.form['form-type'] == "ft":
         email = session['user_id']
-
         role = request.form['role']
         title = request.form['title']
         level = request.form['level']
         type = request.form['type']
-
         city = request.form['city']
         state = request.form['state']
         base = request.form['base']
@@ -259,7 +258,7 @@ def add():
         )
         lid = list(lid)[0][0]
         addcompany = g.conn.execute(
-            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s)",
+            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
             (company, city, state)
         )
         linking = g.conn.execute(
@@ -271,25 +270,30 @@ VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, now(), %s);""",
                           (session['user_id'], lid, city, state, base, stock, bonus, specialization, company, description),
         )
 
+      if request.form['form-type'] == "intern":
+        email = session['user_id']
+        city = request.form['city']
+        state = request.form['state']
+        hourly = request.form['base']
+        bonus = request.form['bonus']
+        description = request.form['description']
+        company = request.form['company']
 
-        '''
-        '''
-        '''
-        try:
-          cursor = g.conn.execute(
-                          "INSERT INTO Users (email, password, name, gender, yoe, education) VALUES (%s, %s, %s, %s, %s, %s)",
-                          (email, password, name, gender, yoe, education),
-          )
-        except exc.IntegrityError as e:
-          if isinstance(e.orig, UniqueViolation):
-            return render_template('add.html', dsk="", input="", color="red", errorText="User already exists", show = True)
-          if isinstance(e.orig, CheckViolation):
-            return render_template('add.html', dsk="", input="", color="red", errorText="Invalid input", show = True)
-        '''
-        specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
-        specs = [x[0] for x in specs]
+        addcompany = g.conn.execute(
+            "INSERT INTO Company VALUES (%s, NULL, NULL, %s, %s) ON CONFLICT DO NOTHING",
+            (company, city, state)
+        )
+        post = g.conn.execute("""INSERT INTO Post_Intern(pid, aid, email, city, state, hourly, bonus, cname, timestamp, description)
+VALUES(DEFAULT, NULL, %s, %s, %s, %s, %s, %s, now(), %s);""",
+                          (session['user_id'], city, state, hourly, bonus, company, description),
+        )
 
-        return render_template('add.html', dsk="", input="", color="green", errorText="Successfully created", show = True, specs = specs)
+
+
+      specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+      specs = [x[0] for x in specs]
+
+      return render_template('add.html', dsk="", input="", color="green", errorText="Successfully created", show = True, specs = specs)
     specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
     specs = [x[0] for x in specs]
     companies = list(g.conn.execute("SELECT DISTINCT name FROM Company"))
@@ -358,36 +362,55 @@ def signup():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-
   if request.method == 'POST':
-    aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
-    print("FORM: ", request.form['pid'])
-    pid = request.form['pid']
-    cursor = g.conn.execute(
-"""UPDATE Post_FT
-SET aid = %s
-WHERE pid = %s
-""", (aid, pid,))
+    if request.form['type'] == "intern":
+        aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
+        print("FORM: ", request.form['pid'])
+        pid = request.form['pid']
+        cursor = g.conn.execute(
+    """UPDATE Post_Intern
+    SET aid = %s
+    WHERE pid = %s
+    """, (aid, pid,))
+
+    if request.form['type'] == "ft":
+        aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
+        print("FORM: ", request.form['pid'])
+        pid = request.form['pid']
+        cursor = g.conn.execute(
+    """UPDATE Post_FT
+    SET aid = %s
+    WHERE pid = %s
+    """, (aid, pid,))
+
+
     cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid is NULL")
-    names = []
-    for result in cursor:
-      names.append(result)
+    ft_data = list(cursor)
     cursor.close()
 
-    context = dict(data = names)
+    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid is NULL")
+    intern_data = list(cursor)
+    cursor.close()
+
+    context = dict(ft_data = ft_data, intern_data = intern_data)
     return render_template("admin.html", **context)
+
+
+    
   if 'user_id' not in session.keys():
     return "Not Logged In"
   cursor = g.conn.execute("SELECT * FROM Admin WHERE email=%s", (session['user_id'] ,))
   if len(cursor.fetchall()) == 0:
     return "Not Admin"
-  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NULL")
-  names = []
-  for result in cursor:
-    names.append(result)
+  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid is NULL")
+  ft_data = list(cursor)
   cursor.close()
 
-  context = dict(data = names)
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid is NULL")
+  intern_data = list(cursor)
+  cursor.close()
+
+  context = dict(ft_data = ft_data, intern_data = intern_data)
   return render_template("admin.html", **context)
 
 
