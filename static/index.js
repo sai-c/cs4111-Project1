@@ -1,4 +1,11 @@
 $(document).ready(function(){
+    $(".pagebutton").click(function() {
+        let val = $(this).attr("value")
+        $("#page").attr("value", val);
+        $("#pageform").submit()
+    }
+    );
+
     $('.collapsible').collapsible();
 
     $(document).on("click", ".ftsalaryrow", function () {

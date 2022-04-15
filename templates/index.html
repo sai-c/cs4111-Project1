@@ -159,7 +159,18 @@
         </tbody>
     </table>
         </div>
-    
+
+    <form action="/" id="pageform" method="POST">
+      <input type="hidden" id="page" name="page" value="">
+      <ul class="pagination">
+        {% for i in range(a, n) %}
+        <li class="waves-effect {% if i == x %}{{  'active'  }}{% endif %}"><a href="#!" class="pagebutton" value="{{i}}">{{i}}</a></li>
+        {% endfor %}
+      </ul>
+    </form>
+  </form>
+            
+
 
   </div>
 </div>

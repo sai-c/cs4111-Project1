@@ -23,7 +23,7 @@ from sqlalchemy import exc
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, jsonify, session, url_for
 from psycopg2.errors import UniqueViolation, CheckViolation
-
+import math
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -193,8 +193,28 @@ def specializations():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-  if request.method == 'POST':    
-    if 'comment' in request.form.keys():
+  if request.method == 'POST':
+    if 'page' in request.form.keys():
+      pageno = request.form['page']
+      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+      names = []
+      for result in cursor:
+        names.append(result)
+      cursor.close()
+
+      #
+      n = min(math.ceil(len(names) / 10), int(pageno) + 9)
+      a = max(1, int(pageno) - 1)
+      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL OFFSET %s LIMIT 10", 10*(int(pageno)-1) )
+      names = list(cursor)
+      cursor.close()
+      context = dict(data = names)
+      if 'user_id' in session.keys():
+        return render_template("index.html", **context, logged_in=True, a=a, n=n, x=pageno)
+      else:
+        return render_template("index.html", **context, logged_in=False, a=a, n=n, x=pageno)
+
+    elif 'comment' in request.form.keys():
       if 'user_id' not in session.keys():
         return redirect(url_for('login'))
 
@@ -277,7 +297,7 @@ def index():
         names.append(result)
       cursor.close()
       context = dict(data = names)
-      return render_template("index.html", **context, logged_in=True)
+      return render_template("index.html", **context, logged_in=True, a=0, n=0, x=0)
 
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
   names = []
@@ -286,11 +306,21 @@ def index():
   cursor.close()
 
   #
+  n = min(math.ceil(len(names) / 10), 10)
+  a = 1
+
+  cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL LIMIT 10")
+  names = []
+  for result in cursor:
+    names.append(result)
+  cursor.close()
+
+
   context = dict(data = names)
   if 'user_id' in session.keys():
-    return render_template("index.html", **context, logged_in=True)
+    return render_template("index.html", **context, logged_in=True, a=a,n=n)
   else:
-    return render_template("index.html", **context, logged_in=False)
+    return render_template("index.html", **context, logged_in=False, a=a, n= n)
 
 
 #
