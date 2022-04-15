@@ -382,6 +382,12 @@ def another():
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if request.method == 'POST':
+      if 'user_id' not in session.keys():
+          specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
+          specs = [x[0] for x in specs]
+
+          return render_template('add.html', dsk="", input="", color="red", errorText="Not Logged In", show = True, specs = specs)
+
       if request.form['form-type'] == "ft":
         email = session['user_id']
         role = request.form['role']
