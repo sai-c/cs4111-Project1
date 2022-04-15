@@ -44,14 +44,15 @@
           <li><a href="/specializations">Specializations</a></li>
           <li><a href="/internships">Internships</a></li>
 
-          {% if 'username' not in session %}<li><a href="/signup">Sign Up</a></li>{% endif %}
-          {%  if 'username' not in session %}<li><a href="/login">Login</a></li>{% endif %}
-          {% if 'username' in session %}<li><a href="/logout">Logout</a></li>{% endif %}
-          {% if 'username' in session %}<li><a href="/add" id="download-button" class="btn-small waves-effect waves-light red">Add</a></li>{% endif %}
+          {% if 'user_id' not in session %}<li><a href="/signup">Sign Up</a></li>{% endif %}
+          {%  if 'user_id' not in session %}<li><a href="/login">Login</a></li>{% endif %}
+          {% if 'user_id' in session %}<li><a href="/logout">Logout</a></li>{% endif %}
+          {% if 'user_id' in session %}<li><a href="/add" id="download-button" class="btn-small waves-effect waves-light red">Create Post</a></li>{% endif %}
+          {% if 'user_id' in session and session['admin']==True %}<li><a href="/admin" id="download-button" class="btn-small waves-effect waves-light red">Admin</a></li>{% endif %}
 	</ul>
         <ul id="nav-mobile" class="sidenav">
 		  <li><a href="/agency-login">Login</a></li>
-      {%  if 'username' in session %}<li><a href="/logout">Logout</a></li>{% endif %}
+      {%  if 'user_id' in session %}<li><a href="/logout">Logout</a></li>{% endif %}
     </ul>
       </div>
     </nav>

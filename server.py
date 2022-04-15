@@ -41,8 +41,8 @@ app = Flask(__name__, template_folder=tmpl_dir)
 # For your convenience, we already set it to the class database
 
 # Use the DB credentials you received by e-mail
-DB_USER = "bg2751"
-DB_PASSWORD = "1733"
+DB_USER = "vhc2109"
+DB_PASSWORD = "2008"
 
 DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
@@ -53,15 +53,6 @@ DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/proj1part2
 # This line creates a database engine that knows how to connect to the URI above
 #
 engine = create_engine(DATABASEURI)
-
-
-# Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
 
 
@@ -488,6 +479,13 @@ def login():
             return render_template('login.html', dsk="", input="", color="red", errorText="Incorrect Password", show = True)
         session.clear()
         session['user_id'] = email
+        cursor = g.conn.execute("SELECT * FROM Admin WHERE email=%s", (email,))
+        if len(cursor.fetchall()) == 0:
+          session['admin'] = False
+        else:
+          session['admin'] = True
+        
+
         return redirect(url_for('index'))
     return render_template('login.html', dsk="", input="", color="", errorText="", show = False)
 
