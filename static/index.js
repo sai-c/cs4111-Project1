@@ -56,7 +56,7 @@ $(document).ready(function(){
                     comment.append(timestamp)
                     comments.append("<hr>")
                     comments.append(comment)
-                });
+                    });
 
                 $("#" + test).append(comments);
                 $("#" + test).append("<hr>");

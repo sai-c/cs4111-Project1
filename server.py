@@ -265,15 +265,25 @@ def index():
                         "INSERT INTO Comment (cid, email, pid, timestamp, content) VALUES (DEFAULT, %s, %s, now(), %s)",
                         (session['user_id'], request.form['pid'], content),
         )
-        cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
-        names = []
-        for result in cursor:
-          names.append(result)
-        cursor.close()
-        n = min(math.ceil(len(names) / 10), 10)
-        a = 1
-        context = dict(data = names)
-        return render_template("index.html", **context, a=a, n=n)
+      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL")
+      names = []
+      for result in cursor:
+        names.append(result)
+      cursor.close()
+
+      #
+      n = min(math.ceil(len(names) / 10), 10)
+      a = 1
+
+      cursor = g.conn.execute("SELECT * FROM Post_FT WHERE aid IS NOT NULL LIMIT 10")
+      names = []
+      for result in cursor:
+        names.append(result)
+      cursor.close()
+
+
+      context = dict(data = names)
+      return render_template("index.html", **context, a=a,n=n, x=1)
     # filtering posts
     else:
       loc = ''
@@ -361,10 +371,7 @@ def index():
 
 
   context = dict(data = names)
-  if 'user_id' in session.keys():
-    return render_template("index.html", **context, a=a,n=n, x=1)
-  else:
-    return render_template("index.html", **context, a=a, n=n, x=1)
+  return render_template("index.html", **context, a=a,n=n, x=1)
 
 
 #
@@ -492,6 +499,7 @@ def add():
 @app.route('/post/<id>')
 def post(id):    
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE pid=%s", (id,))
+  print(cursor.fetchone())
   return jsonify(cursor.fetchone())
 
 @app.route('/comments/<id>')
