@@ -118,7 +118,7 @@ def internships():
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
   if request.method == "POST":
-    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE lower(cname)=%s", (request.form['cname'].lower(), ))
+    cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL AND lower(cname)=%s", (request.form['cname'].lower(), ))
     names = []
     for result in cursor.fetchall():
         names.append(result)
@@ -131,7 +131,7 @@ def internships():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL")
+  cursor = g.conn.execute("SELECT * FROM Post_Intern WHERE aid IS NOT NULL ORDER BY hourly DESC")
   names = []
   for result in cursor:
     names.append(result)
