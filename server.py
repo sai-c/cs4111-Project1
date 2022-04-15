@@ -492,14 +492,12 @@ def add():
     specs = [x[0] for x in specs]
     companies = list(g.conn.execute("SELECT DISTINCT name FROM Company"))
     companies = [x[0] for x in companies]
-    print(companies)
     return render_template('add.html', dsk="", input="", color="", errorText="", show = False, specs=specs, companies=companies)
 
 
 @app.route('/post/<id>')
 def post(id):    
   cursor = g.conn.execute("SELECT * FROM Post_FT WHERE pid=%s", (id,))
-  print(cursor.fetchone())
   return jsonify(cursor.fetchone())
 
 @app.route('/comments/<id>')
@@ -571,7 +569,6 @@ def admin():
   if request.method == 'POST':
     if request.form['type'] == "intern":
         aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
-        print("FORM: ", request.form['pid'])
         pid = request.form['pid']
         cursor = g.conn.execute(
     """UPDATE Post_Intern
@@ -581,7 +578,6 @@ def admin():
 
     if request.form['type'] == "ft":
         aid = g.conn.execute("SELECT aid FROM Admin WHERE email = %s", (session['user_id'] ,)).fetchone()[0]
-        print("FORM: ", request.form['pid'])
         pid = request.form['pid']
         cursor = g.conn.execute(
     """UPDATE Post_FT
