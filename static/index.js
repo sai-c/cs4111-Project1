@@ -32,13 +32,13 @@ $(document).ready(function(){
                 description.text(data['description'])
                 let timestamp = $("<div class='timestamp'>")
                 timestamp.text(data['timestamp'])
-                $("#" + test).append(sname)
-                $("#" + test).append(level)
-                $("#" + test).append("<h6>Description</h6>")
-                $("#" + test).append(description)
-                $("#" + test).append("<h6>Date</h6>")
-                $("#" + test).append(timestamp)
-                $("#" + test).append("<h6>Comments</h6>")
+                $("#" + test + " #post").append(sname)
+                $("#" + test + " #post").append(level)
+                $("#" + test + " #post").append("<h6>Description</h6>")
+                $("#" + test + " #post").append(description)
+                $("#" + test + " #post").append("<h6>Date</h6>")
+                $("#" + test + " #post").append(timestamp)
+                $("#" + test + " #post").append("<h6>Comments</h6>")
 
             });
             $.get("/comments/" + test, function(data, status){
@@ -58,8 +58,8 @@ $(document).ready(function(){
                     comments.append(comment)
                     });
 
-                $("#" + test).append(comments);
-                $("#" + test).append("<hr>");
+                $("#" + test + " #comments").append(comments);
+                $("#" + test + " #comments").append("<hr>");
 
                 let string = `
                 <form class="center-align center" style="margin: 5% 10% 10% 10%" method="POST" action="/">
@@ -72,7 +72,7 @@ $(document).ready(function(){
                     <input type="hidden" id="pid" name="pid" value=` + test +  `>
                 </form>
                 </div>`
-                $("#" + test).append(string);
+                $("#" + test + " #comments").append(string);
 
             
                 
