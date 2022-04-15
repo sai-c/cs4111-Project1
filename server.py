@@ -445,7 +445,7 @@ def add():
           return render_template('add.html', dsk="", input="", color="red", errorText="Error inserting into database", show = True, specs = specs)
 
       if request.form['form-type'] == "intern":
-        required_keys = ['hourly', 'bonus', 'city', 'state', 'company', 'description']
+        required_keys = ['hourly', 'bonus', 'city', 'state', 'company']
         for key in required_keys:
           if key not in request.form.keys():
             specs = g.conn.execute("SELECT DISTINCT name FROM Specialization").fetchall()
